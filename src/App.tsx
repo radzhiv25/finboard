@@ -1,9 +1,7 @@
 import { BrowserRouter as Router, useLocation } from "react-router-dom"
 import { AuthProvider, useAuth } from "@/contexts/AuthContext"
-import { Dashboard } from "@/components/Dashboard"
 import { LandingPage } from "@/components/LandingPage"
 import { AuthPage } from "@/pages/AuthPage"
-import { Settings } from "@/components/Settings"
 import { DebugAuth } from "@/components/DebugAuth"
 import { TestComponent } from "@/components/TestComponent"
 import { motion } from "framer-motion"
@@ -53,17 +51,14 @@ function AppContent() {
     return <TestComponent />
   }
 
-  // Always show landing page for now to test
+  // Show landing page for all routes to test without auth
   if (currentPath === '/login' || currentPath === '/signup') {
     return <AuthPage />
   }
 
-  if (currentPath === '/dashboard' && user) {
-    return <Dashboard />
-  }
-
-  if (currentPath === '/settings' && user) {
-    return <Settings />
+  // Temporarily show landing page for dashboard and settings to test
+  if (currentPath === '/dashboard' || currentPath === '/settings') {
+    return <LandingPage />
   }
 
   // Default to landing page
