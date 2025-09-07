@@ -92,7 +92,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         const timeout = setTimeout(() => {
             console.warn('Auth initialization timeout, setting loading to false');
             setLoading(false);
-        }, 5000); // 5 second timeout
+        }, 2000); // 2 second timeout
 
         initializeAuth();
 

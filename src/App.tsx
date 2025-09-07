@@ -1,17 +1,26 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom"
+import { BrowserRouter as Router, useLocation } from "react-router-dom"
 import { AuthProvider, useAuth } from "@/contexts/AuthContext"
 import { Dashboard } from "@/components/Dashboard"
 import { LandingPage } from "@/components/LandingPage"
 import { AuthPage } from "@/pages/AuthPage"
 import { Settings } from "@/components/Settings"
 import { DebugAuth } from "@/components/DebugAuth"
+import { TestComponent } from "@/components/TestComponent"
 import { motion } from "framer-motion"
 
 function AppContent() {
   const { user, loading } = useAuth()
+  const location = useLocation()
 
-  console.log('AppContent render:', { user: !!user, loading })
+  console.log('AppContent render:', { 
+    user: !!user, 
+    loading, 
+    pathname: location.pathname,
+    search: location.search,
+    hash: location.hash
+  })
 
+  // Show loading only for a short time, then show content
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -36,21 +45,29 @@ function AppContent() {
     )
   }
 
-  return (
-    <Routes>
-      {/* Public routes */}
-      <Route path="/" element={user ? <Navigate to="/dashboard" replace /> : <LandingPage />} />
-      <Route path="/login" element={user ? <Navigate to="/dashboard" replace /> : <AuthPage />} />
-      <Route path="/signup" element={user ? <Navigate to="/dashboard" replace /> : <AuthPage />} />
+  // Simple routing logic
+  const currentPath = location.pathname
 
-      {/* Protected routes */}
-      <Route path="/dashboard" element={user ? <Dashboard /> : <Navigate to="/login" replace />} />
-      <Route path="/settings" element={user ? <Settings /> : <Navigate to="/login" replace />} />
+  // Test component first to verify basic rendering
+  if (currentPath === '/test') {
+    return <TestComponent />
+  }
 
-      {/* Catch all route */}
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
-  )
+  // Always show landing page for now to test
+  if (currentPath === '/login' || currentPath === '/signup') {
+    return <AuthPage />
+  }
+
+  if (currentPath === '/dashboard' && user) {
+    return <Dashboard />
+  }
+
+  if (currentPath === '/settings' && user) {
+    return <Settings />
+  }
+
+  // Default to landing page
+  return <LandingPage />
 }
 
 function App() {
