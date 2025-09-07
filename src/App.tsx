@@ -12,9 +12,9 @@ function AppContent() {
   const { user, loading } = useAuth()
   const location = useLocation()
 
-  console.log('AppContent render:', { 
-    user: !!user, 
-    loading, 
+  console.log('AppContent render:', {
+    user: !!user,
+    loading,
     pathname: location.pathname,
     search: location.search,
     hash: location.hash
