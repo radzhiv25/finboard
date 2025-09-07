@@ -54,6 +54,18 @@ export function AuthProvider({ children }: AuthProviderProps) {
                         // User session expired or invalid
                         setUser(null);
                         setUserProfile(null);
+                    } else if (error.message.includes('Database or collection not found')) {
+                        // Database doesn't exist yet, create a default profile
+                        console.log('Database not found, using default profile');
+                        const defaultProfile = {
+                            name: currentUser.name || 'User',
+                            preferences: JSON.stringify({
+                                currency: 'USD',
+                                theme: 'light',
+                                notifications: true
+                            })
+                        } as any;
+                        setUserProfile(defaultProfile);
                     } else {
                         console.error('Failed to fetch user profile:', error);
                         setUserProfile(null);
