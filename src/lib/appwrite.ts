@@ -49,26 +49,39 @@ interface UpdateData {
 export const auth = {
     // Create account
     async createAccount(email: string, password: string, name: string) {
-        const user = await account.create(ID.unique(), email, password, name);
+        try {
+            const user = await account.create(ID.unique(), email, password, name);
 
-        // Create user document in database
-        await databases.createDocument(
-            DATABASE_ID,
-            COLLECTION_USERS,
-            user.$id,
-            {
-                name,
-                email,
-                createdAt: new Date().toISOString(),
-                preferences: JSON.stringify({
-                    currency: 'USD',
-                    theme: 'light',
-                    notifications: true
-                } as UserPreferences)
+            // Create user document in database
+            try {
+                await databases.createDocument(
+                    DATABASE_ID,
+                    COLLECTION_USERS,
+                    user.$id,
+                    {
+                        name,
+                        email,
+                        createdAt: new Date().toISOString(),
+                        preferences: JSON.stringify({
+                            currency: 'USD',
+                            theme: 'light',
+                            notifications: true
+                        } as UserPreferences)
+                    }
+                );
+            } catch (dbError: any) {
+                console.error('Database error during account creation:', dbError);
+                if (dbError.code === 404) {
+                    throw new Error('Database or collection not found. Please check your Appwrite setup. See APPWRITE_SETUP_GUIDE.md for instructions.');
+                }
+                throw new Error(`Failed to create user profile: ${dbError.message}`);
             }
-        );
 
-        return user;
+            return user;
+        } catch (error: any) {
+            console.error('Account creation error:', error);
+            throw error;
+        }
     },
 
     // Login with email and password
@@ -138,11 +151,19 @@ export const auth = {
         const user = await this.getCurrentUser();
         if (!user) throw new Error('User not authenticated');
 
-        return await databases.getDocument(
-            DATABASE_ID,
-            COLLECTION_USERS,
-            user.$id
-        );
+        try {
+            return await databases.getDocument(
+                DATABASE_ID,
+                COLLECTION_USERS,
+                user.$id
+            );
+        } catch (error: any) {
+            console.error('Profile fetch error:', error);
+            if (error.code === 404) {
+                throw new Error('Database or collection not found. Please check your Appwrite setup. See APPWRITE_SETUP_GUIDE.md for instructions.');
+            }
+            throw new Error(`Failed to fetch user profile: ${error.message}`);
+        }
     }
 };
 
