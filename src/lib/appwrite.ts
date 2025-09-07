@@ -2,8 +2,8 @@ import { Client, Account, Databases, Storage, ID, Query, OAuthProvider } from 'a
 
 // Appwrite configuration
 const client = new Client()
-    .setEndpoint(import.meta.env.VITE_APPWRITE_ENDPOINT || 'https://cloud.appwrite.io/v1')
-    .setProject(import.meta.env.VITE_APPWRITE_PROJECT_ID || 'your-project-id');
+    .setEndpoint(import.meta.env.VITE_APPWRITE_ENDPOINT || 'https://sfo.cloud.appwrite.io/v1')
+    .setProject(import.meta.env.VITE_APPWRITE_PROJECT_ID || '68bd87cf003939f9cf46');
 
 // Initialize Appwrite services
 export const account = new Account(client);
