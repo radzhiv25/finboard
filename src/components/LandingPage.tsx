@@ -9,7 +9,7 @@ import { ArrowRight, BarChart3, Shield, Zap, Users, TrendingUp, CheckCircle } fr
 
 export function LandingPage() {
     console.log('LandingPage rendering...')
-    
+
     return (
         <div className="min-h-screen bg-background">
             <Navbar />

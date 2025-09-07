@@ -1,7 +1,7 @@
 import { LandingPage } from "@/components/LandingPage"
 
 function App() {
-  return <LandingPage />
+    return <LandingPage />
 }
 
 export default App
