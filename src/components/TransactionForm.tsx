@@ -157,7 +157,7 @@ export function TransactionForm({ onSuccess, onCancel, showCard = true }: Transa
         } catch (error: unknown) {
             console.error('Transaction creation failed:', error);
             let errorMessage = 'Failed to create transaction';
-            
+
             if (error instanceof Error) {
                 if (error.message.includes('Database not found')) {
                     errorMessage = 'Database not set up yet. Please set up your Appwrite database first. See APPWRITE_SETUP_GUIDE.md for instructions.';
@@ -165,7 +165,7 @@ export function TransactionForm({ onSuccess, onCancel, showCard = true }: Transa
                     errorMessage = error.message;
                 }
             }
-            
+
             alert(errorMessage);
         } finally {
             setIsLoading(false);
