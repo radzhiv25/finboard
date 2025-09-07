@@ -1,18 +1,16 @@
 {
-  "name": "finboard",
-  "private": true,
-  "version": "0.0.0",
-  "type": "module",
+  "name": "FinBoard",
+  "version": "1.0.0",
+  "description": "AI-powered financial dashboard built with React and Appwrite",
+  "main": "dist/index.html",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
-    "build:appwrite": "node build-appwrite.js",
-    "build:check": "tsc --noEmit",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "preview": "vite preview",
-    "clean": "rm -rf dist",
-    "type-check": "tsc --noEmit"
+    "build": "npm install --legacy-peer-deps && npm run build:prod",
+    "build:prod": "tsc -b && vite build",
+    "start": "vite preview --port 3000 --host 0.0.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.1",
