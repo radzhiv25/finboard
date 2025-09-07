@@ -44,16 +44,55 @@ npm run preview
 
 ### Deploy to Appwrite
 
+### Option 1: Using Appwrite Console (Recommended)
+
 1. **Build the project**:
    ```bash
-   npm run build
+   npm run build:appwrite
    ```
 
 2. **Deploy to Appwrite**:
+   - Go to your Appwrite project console
+   - Navigate to "Functions" → "Create Function"
+   - Choose "Blank" template
+   - Set runtime to "Node.js 18"
+   - Upload the `dist` folder contents as a zip file
+   - Set the entry point to `dist/index.html`
+   - Configure environment variables in the function settings
+
+### Option 2: Using Appwrite CLI
+
+1. **Install Appwrite CLI**:
+   ```bash
+   npm install -g appwrite-cli
+   ```
+
+2. **Login to Appwrite**:
+   ```bash
+   appwrite login
+   ```
+
+3. **Deploy**:
+   ```bash
+   npm run build:appwrite
+   appwrite functions create --functionId=finboard --name="FinBoard" --runtime=node-18.0
+   appwrite functions createDeployment --functionId=finboard --code=dist
+   ```
+
+### Option 3: Manual Upload
+
+1. **Build and compress**:
+   ```bash
+   npm run build:appwrite
+   cd dist
+   zip -r ../finboard-dist.zip .
+   ```
+
+2. **Upload to Appwrite**:
    - Go to your Appwrite project
-   - Navigate to "Functions" or "Storage"
-   - Upload the `dist` folder contents
-   - Configure the hosting settings
+   - Navigate to "Storage" → "Create Bucket"
+   - Upload the `finboard-dist.zip` file
+   - Configure as a static website
 
 ### Alternative Deployment Options
 
@@ -94,6 +133,29 @@ npm run build
 2. **Environment Variables**: Ensure all required variables are set
 3. **Appwrite Connection**: Verify endpoint and project ID
 4. **CORS Issues**: Check Appwrite CORS settings
+
+#### Appwrite Deployment Specific Issues
+
+**ERESOLVE Dependency Conflicts**:
+```
+npm error ERESOLVE could not resolve
+npm error peerOptional zod@"^3.23.8" from openai@5.19.1
+```
+
+**Solution**: This is already fixed in the current version. The project now uses:
+- Zod v3.23.8 (compatible with OpenAI)
+- `.npmrc` with `legacy-peer-deps=true`
+- Appwrite-specific build script
+
+**If you still encounter this error**:
+1. Delete `node_modules` and `package-lock.json`
+2. Run `npm install --legacy-peer-deps`
+3. Use `npm run build:appwrite` for deployment
+
+**Build Archive Not Created**:
+- Ensure you're using Node.js 18+
+- Check that all dependencies are installed
+- Verify the build completes successfully locally first
 
 ### Performance Optimization
 
