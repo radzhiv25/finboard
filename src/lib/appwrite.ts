@@ -174,16 +174,24 @@ export const transactions = {
         const user = await auth.getCurrentUser();
         if (!user) throw new Error('User not authenticated');
 
-        return await databases.createDocument(
-            DATABASE_ID,
-            COLLECTION_TRANSACTIONS,
-            ID.unique(),
-            {
-                userId: user.$id,
-                ...transaction,
-                tags: transaction.tags ? JSON.stringify(transaction.tags) : null
+        try {
+            return await databases.createDocument(
+                DATABASE_ID,
+                COLLECTION_TRANSACTIONS,
+                ID.unique(),
+                {
+                    userId: user.$id,
+                    ...transaction,
+                    tags: transaction.tags ? JSON.stringify(transaction.tags) : null
+                }
+            );
+        } catch (error: any) {
+            console.error('Transaction creation failed:', error);
+            if (error.code === 404) {
+                throw new Error('Database not found. Please set up your Appwrite database first. See APPWRITE_SETUP_GUIDE.md for instructions.');
             }
-        );
+            throw new Error(`Failed to create transaction: ${error.message}`);
+        }
     },
 
     // Get user transactions
@@ -191,16 +199,26 @@ export const transactions = {
         const user = await auth.getCurrentUser();
         if (!user) throw new Error('User not authenticated');
 
-        return await databases.listDocuments(
-            DATABASE_ID,
-            COLLECTION_TRANSACTIONS,
-            [
-                Query.equal('userId', user.$id),
-                Query.orderDesc('date'),
-                Query.limit(limit),
-                Query.offset(offset)
-            ]
-        );
+        try {
+            return await databases.listDocuments(
+                DATABASE_ID,
+                COLLECTION_TRANSACTIONS,
+                [
+                    Query.equal('userId', user.$id),
+                    Query.orderDesc('date'),
+                    Query.limit(limit),
+                    Query.offset(offset)
+                ]
+            );
+        } catch (error: any) {
+            console.error('Failed to load transactions:', error);
+            if (error.code === 404) {
+                // Database not found, return empty result
+                console.log('Database not found, returning empty transactions list');
+                return { documents: [], total: 0 };
+            }
+            throw new Error(`Failed to load transactions: ${error.message}`);
+        }
     },
 
     // Update transaction

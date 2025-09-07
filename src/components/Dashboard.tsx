@@ -97,6 +97,10 @@ export function Dashboard() {
             await generateAIInsights(transactionsData.documents as unknown as Transaction[]);
         } catch (error) {
             console.error('Failed to load dashboard data:', error);
+            // If it's a database not found error, show a helpful message
+            if (error instanceof Error && error.message.includes('Database not found')) {
+                console.log('Database not found, dashboard will show empty state');
+            }
         } finally {
             setLoading(false);
         }
