@@ -296,8 +296,8 @@ export function Dashboard() {
                                                 <div key={transaction.$id} className="flex items-center justify-between">
                                                     <div className="flex items-center space-x-3">
                                                         <div className={`h-10 w-10 rounded-full flex items-center justify-center ${isIncome
-                                                                ? 'bg-green-100 text-green-600'
-                                                                : 'bg-red-100 text-red-600'
+                                                            ? 'bg-green-100 text-green-600'
+                                                            : 'bg-red-100 text-red-600'
                                                             }`}>
                                                             {isIncome ? (
                                                                 <TrendingUp className="h-4 w-4" />

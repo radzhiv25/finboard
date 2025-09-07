@@ -2,31 +2,31 @@ import OpenAI from 'openai';
 
 // Initialize OpenAI client
 const openai = new OpenAI({
-  apiKey: import.meta.env.VITE_OPENAI_API_KEY,
-  dangerouslyAllowBrowser: true // Only for client-side usage
+    apiKey: import.meta.env.VITE_OPENAI_API_KEY,
+    dangerouslyAllowBrowser: true // Only for client-side usage
 });
 
 export interface CategoryPrediction {
-  category: string;
-  confidence: number;
-  reasoning: string;
+    category: string;
+    confidence: number;
+    reasoning: string;
 }
 
 export interface SpendingInsight {
-  category: string;
-  confidence: number;
-  suggestion: string;
-  spendingPattern?: string;
-  trend?: 'increasing' | 'decreasing' | 'stable';
+    category: string;
+    confidence: number;
+    suggestion: string;
+    spendingPattern?: string;
+    trend?: 'increasing' | 'decreasing' | 'stable';
 }
 
 export const aiService = {
-  /**
-   * Predict category for a transaction based on title and description
-   */
-  async predictCategory(title: string, description: string): Promise<CategoryPrediction> {
-    try {
-      const prompt = `
+    /**
+     * Predict category for a transaction based on title and description
+     */
+    async predictCategory(title: string, description: string): Promise<CategoryPrediction> {
+        try {
+            const prompt = `
         Analyze this financial transaction and predict the most appropriate category.
         
         Transaction Title: "${title}"
@@ -45,56 +45,56 @@ export const aiService = {
         }
       `;
 
-      const completion = await openai.chat.completions.create({
-        model: "gpt-4o",
-        messages: [
-          {
-            role: "system",
-            content: "You are a financial AI assistant that categorizes transactions. Always respond with valid JSON only."
-          },
-          {
-            role: "user",
-            content: prompt
-          }
-        ],
-        temperature: 0.3,
-        max_tokens: 200
-      });
+            const completion = await openai.chat.completions.create({
+                model: "gpt-4o",
+                messages: [
+                    {
+                        role: "system",
+                        content: "You are a financial AI assistant that categorizes transactions. Always respond with valid JSON only."
+                    },
+                    {
+                        role: "user",
+                        content: prompt
+                    }
+                ],
+                temperature: 0.3,
+                max_tokens: 200
+            });
 
-      const response = completion.choices[0]?.message?.content;
-      if (!response) {
-        throw new Error('No response from OpenAI');
-      }
+            const response = completion.choices[0]?.message?.content;
+            if (!response) {
+                throw new Error('No response from OpenAI');
+            }
 
-      const parsed = JSON.parse(response);
-      return {
-        category: parsed.category || 'Other',
-        confidence: Math.min(Math.max(parsed.confidence || 0.5, 0), 1),
-        reasoning: parsed.reasoning || 'No reasoning provided'
-      };
-    } catch (error) {
-      console.error('OpenAI category prediction failed:', error);
-      // Fallback to simple keyword matching
-      return fallbackCategoryPrediction(title, description);
-    }
-  },
+            const parsed = JSON.parse(response);
+            return {
+                category: parsed.category || 'Other',
+                confidence: Math.min(Math.max(parsed.confidence || 0.5, 0), 1),
+                reasoning: parsed.reasoning || 'No reasoning provided'
+            };
+        } catch (error) {
+            console.error('OpenAI category prediction failed:', error);
+            // Fallback to simple keyword matching
+            return fallbackCategoryPrediction(title, description);
+        }
+    },
 
-  /**
-   * Generate spending insights based on transaction history
-   */
-  async generateInsights(transactions: any[]): Promise<SpendingInsight[]> {
-    try {
-      if (transactions.length === 0) {
-        return [];
-      }
+    /**
+     * Generate spending insights based on transaction history
+     */
+    async generateInsights(transactions: any[]): Promise<SpendingInsight[]> {
+        try {
+            if (transactions.length === 0) {
+                return [];
+            }
 
-      const prompt = `
+            const prompt = `
         Analyze these financial transactions and provide insights about spending patterns and suggestions for improvement.
         
         Transactions:
-        ${transactions.map(t => 
-          `- ${t.title}: ${t.description} (${t.amount} ${t.currency}, ${t.category}, ${t.type})`
-        ).join('\n')}
+        ${transactions.map(t =>
+                `- ${t.title}: ${t.description} (${t.amount} ${t.currency}, ${t.category}, ${t.type})`
+            ).join('\n')}
         
         Please respond with a JSON array of insights, each containing:
         - category: The spending category this insight relates to
@@ -115,72 +115,72 @@ export const aiService = {
         ]
       `;
 
-      const completion = await openai.chat.completions.create({
-        model: "gpt-4o",
-        messages: [
-          {
-            role: "system",
-            content: "You are a financial AI advisor that analyzes spending patterns and provides actionable insights. Always respond with valid JSON only."
-          },
-          {
-            role: "user",
-            content: prompt
-          }
-        ],
-        temperature: 0.4,
-        max_tokens: 500
-      });
+            const completion = await openai.chat.completions.create({
+                model: "gpt-4o",
+                messages: [
+                    {
+                        role: "system",
+                        content: "You are a financial AI advisor that analyzes spending patterns and provides actionable insights. Always respond with valid JSON only."
+                    },
+                    {
+                        role: "user",
+                        content: prompt
+                    }
+                ],
+                temperature: 0.4,
+                max_tokens: 500
+            });
 
-      const response = completion.choices[0]?.message?.content;
-      if (!response) {
-        throw new Error('No response from OpenAI');
-      }
+            const response = completion.choices[0]?.message?.content;
+            if (!response) {
+                throw new Error('No response from OpenAI');
+            }
 
-      const parsed = JSON.parse(response);
-      return Array.isArray(parsed) ? parsed : [];
-    } catch (error) {
-      console.error('OpenAI insights generation failed:', error);
-      return [];
+            const parsed = JSON.parse(response);
+            return Array.isArray(parsed) ? parsed : [];
+        } catch (error) {
+            console.error('OpenAI insights generation failed:', error);
+            return [];
+        }
     }
-  }
 };
 
 /**
  * Fallback category prediction using simple keyword matching
  */
 function fallbackCategoryPrediction(title: string, description: string): CategoryPrediction {
-  const text = `${title} ${description}`.toLowerCase();
-  
-  const categoryKeywords = {
-    'Food & Dining': ['food', 'restaurant', 'dining', 'coffee', 'cafe', 'starbucks', 'mcdonalds', 'pizza', 'lunch', 'dinner', 'breakfast'],
-    'Transportation': ['uber', 'lyft', 'taxi', 'gas', 'fuel', 'parking', 'metro', 'bus', 'train', 'flight', 'airline'],
-    'Shopping': ['shopping', 'store', 'amazon', 'walmart', 'target', 'clothing', 'shoes', 'electronics'],
-    'Entertainment': ['movie', 'cinema', 'netflix', 'spotify', 'game', 'entertainment', 'concert', 'theater'],
-    'Bills & Utilities': ['bill', 'utility', 'electric', 'water', 'internet', 'phone', 'cable', 'rent', 'mortgage'],
-    'Healthcare': ['doctor', 'medical', 'pharmacy', 'hospital', 'clinic', 'medicine', 'health', 'dental'],
-    'Education': ['school', 'education', 'course', 'university', 'college', 'book', 'tuition', 'learning'],
-    'Travel': ['travel', 'hotel', 'flight', 'vacation', 'trip', 'booking', 'airbnb'],
-    'Groceries': ['grocery', 'supermarket', 'market', 'food', 'produce', 'meat', 'vegetables'],
-    'Income': ['salary', 'wage', 'bonus', 'income', 'paycheck', 'freelance', 'payment'],
-    'Investment': ['investment', 'stock', 'bond', 'mutual fund', 'retirement', '401k', 'savings']
-  };
+    const text = `${title} ${description}`.toLowerCase();
 
-  let bestCategory = 'Other';
-  let maxMatches = 0;
+    const categoryKeywords = {
+        'Food & Dining': ['food', 'restaurant', 'dining', 'coffee', 'cafe', 'starbucks', 'mcdonalds', 'pizza', 'lunch', 'dinner', 'breakfast'],
+        'Transportation': ['uber', 'lyft', 'taxi', 'gas', 'fuel', 'parking', 'metro', 'bus', 'train', 'flight', 'airline'],
+        'Shopping': ['shopping', 'store', 'amazon', 'walmart', 'target', 'clothing', 'shoes', 'electronics'],
+        'Entertainment': ['movie', 'cinema', 'netflix', 'spotify', 'game', 'entertainment', 'concert', 'theater'],
+        'Bills & Utilities': ['bill', 'utility', 'electric', 'water', 'internet', 'phone', 'cable', 'rent', 'mortgage'],
+        'Healthcare': ['doctor', 'medical', 'pharmacy', 'hospital', 'clinic', 'medicine', 'health', 'dental'],
+        'Education': ['school', 'education', 'course', 'university', 'college', 'book', 'tuition', 'learning'],
+        'Travel': ['travel', 'hotel', 'flight', 'vacation', 'trip', 'booking', 'airbnb'],
+        'Groceries': ['grocery', 'supermarket', 'market', 'food', 'produce', 'meat', 'vegetables'],
+        'Income': ['salary', 'wage', 'bonus', 'income', 'paycheck', 'freelance', 'payment'],
+        'Investment': ['investment', 'stock', 'bond', 'mutual fund', 'retirement', '401k', 'savings']
+    };
 
-  for (const [category, keywords] of Object.entries(categoryKeywords)) {
-    const matches = keywords.filter(keyword => text.includes(keyword)).length;
-    if (matches > maxMatches) {
-      maxMatches = matches;
-      bestCategory = category;
+    let bestCategory = 'Other';
+    let maxMatches = 0;
+
+    for (const [category, keywords] of Object.entries(categoryKeywords)) {
+        const matches = keywords.filter(keyword => text.includes(keyword)).length;
+        if (matches > maxMatches) {
+            maxMatches = matches;
+            bestCategory = category;
+        }
     }
-  }
 
-  return {
-    category: bestCategory,
-    confidence: maxMatches > 0 ? Math.min(0.7, maxMatches * 0.2) : 0.3,
-    reasoning: maxMatches > 0 
-      ? `Matched ${maxMatches} keyword(s) related to ${bestCategory}`
-      : 'No specific keywords found, defaulting to Other'
-  };
+    return {
+        category: bestCategory,
+        confidence: maxMatches > 0 ? Math.min(0.7, maxMatches * 0.2) : 0.3,
+        reasoning: maxMatches > 0
+            ? `Matched ${maxMatches} keyword(s) related to ${bestCategory}`
+            : 'No specific keywords found, defaulting to Other'
+    };
 }
