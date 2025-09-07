@@ -1,10 +1,17 @@
 import OpenAI from 'openai';
 
-// Initialize OpenAI client
-const openai = new OpenAI({
-    apiKey: import.meta.env.VITE_OPENAI_API_KEY,
-    dangerouslyAllowBrowser: true // Only for client-side usage
-});
+// Initialize OpenAI client only if API key is available
+let openai: OpenAI | null = null;
+
+const getOpenAIClient = () => {
+    if (!openai && import.meta.env.VITE_OPENAI_API_KEY) {
+        openai = new OpenAI({
+            apiKey: import.meta.env.VITE_OPENAI_API_KEY,
+            dangerouslyAllowBrowser: true // Only for client-side usage
+        });
+    }
+    return openai;
+};
 
 export interface CategoryPrediction {
     category: string;
@@ -26,6 +33,16 @@ export const aiService = {
      */
     async predictCategory(title: string, description: string): Promise<CategoryPrediction> {
         try {
+            const client = getOpenAIClient();
+            if (!client) {
+                console.warn('OpenAI API key not available, using fallback category prediction');
+                return {
+                    category: 'Other',
+                    confidence: 0.5,
+                    reasoning: 'AI prediction unavailable - no API key provided'
+                };
+            }
+
             const prompt = `
         Analyze this financial transaction and predict the most appropriate category.
         
@@ -45,7 +62,7 @@ export const aiService = {
         }
       `;
 
-            const completion = await openai.chat.completions.create({
+            const completion = await client.chat.completions.create({
                 model: "gpt-4o",
                 messages: [
                     {
@@ -84,6 +101,20 @@ export const aiService = {
      */
     async generateInsights(transactions: any[]): Promise<SpendingInsight[]> {
         try {
+            const client = getOpenAIClient();
+            if (!client) {
+                console.warn('OpenAI API key not available, using fallback insights');
+                return [
+                    {
+                        category: 'General',
+                        confidence: 0.5,
+                        suggestion: 'AI insights unavailable - no API key provided. Consider adding your OpenAI API key for personalized insights.',
+                        spendingPattern: 'Unable to analyze',
+                        trend: 'stable'
+                    }
+                ];
+            }
+
             if (transactions.length === 0) {
                 return [];
             }
@@ -115,7 +146,7 @@ export const aiService = {
         ]
       `;
 
-            const completion = await openai.chat.completions.create({
+            const completion = await client.chat.completions.create({
                 model: "gpt-4o",
                 messages: [
                     {
