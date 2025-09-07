@@ -42,11 +42,11 @@ function AppContent() {
       <Route path="/" element={user ? <Navigate to="/dashboard" replace /> : <LandingPage />} />
       <Route path="/login" element={user ? <Navigate to="/dashboard" replace /> : <AuthPage />} />
       <Route path="/signup" element={user ? <Navigate to="/dashboard" replace /> : <AuthPage />} />
-      
+
       {/* Protected routes */}
       <Route path="/dashboard" element={user ? <Dashboard /> : <Navigate to="/login" replace />} />
       <Route path="/settings" element={user ? <Settings /> : <Navigate to="/login" replace />} />
-      
+
       {/* Catch all route */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

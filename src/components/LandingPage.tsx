@@ -29,8 +29,8 @@ export function LandingPage() {
                             analyze spending patterns, and make smarter money decisions.
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                            <Button 
-                                size="lg" 
+                            <Button
+                                size="lg"
                                 className="text-lg px-8"
                                 asChild
                             >
@@ -39,9 +39,9 @@ export function LandingPage() {
                                     <ArrowRight className="ml-2 h-5 w-5" />
                                 </Link>
                             </Button>
-                            <Button 
-                                variant="outline" 
-                                size="lg" 
+                            <Button
+                                variant="outline"
+                                size="lg"
                                 className="text-lg px-8"
                                 asChild
                             >
@@ -155,8 +155,8 @@ export function LandingPage() {
                         </CardHeader>
                         <CardContent className="text-center">
                             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-6">
-                                <Button 
-                                    size="lg" 
+                                <Button
+                                    size="lg"
                                     className="text-lg px-8"
                                     asChild
                                 >
@@ -164,9 +164,9 @@ export function LandingPage() {
                                         Get Started Free
                                     </Link>
                                 </Button>
-                                <Button 
-                                    variant="outline" 
-                                    size="lg" 
+                                <Button
+                                    variant="outline"
+                                    size="lg"
                                     className="text-lg px-8"
                                     asChild
                                 >

@@ -175,15 +175,15 @@ export function Dashboard() {
                             <Button variant="ghost" size="sm">
                                 <Bell className="h-4 w-4" />
                             </Button>
-                                   <Button
-                                       variant="ghost"
-                                       size="sm"
-                                       asChild
-                                   >
-                                       <Link to="/settings">
-                                           <Settings className="h-4 w-4" />
-                                       </Link>
-                                   </Button>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                asChild
+                            >
+                                <Link to="/settings">
+                                    <Settings className="h-4 w-4" />
+                                </Link>
+                            </Button>
                             <Button variant="ghost" size="sm" onClick={logout}>
                                 <LogOut className="h-4 w-4" />
                             </Button>

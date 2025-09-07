@@ -19,8 +19,8 @@ export function Navbar() {
             <a href="#about" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">About</a>
           </div>
           <div className="flex items-center space-x-4">
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               size="sm"
               asChild
             >
@@ -28,7 +28,7 @@ export function Navbar() {
                 Sign In
               </Link>
             </Button>
-            <Button 
+            <Button
               size="sm"
               asChild
             >
