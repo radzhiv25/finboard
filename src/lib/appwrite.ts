@@ -1,15 +1,11 @@
 import { Client, Account, Databases, Storage, ID, Query, OAuthProvider } from 'appwrite';
-import { appwriteConfig, validateEnvironment, logEnvironment } from './env';
+import { appwriteConfig, validateEnvironment } from './env';
 
 // Validate environment variables
 const envValidation = validateEnvironment();
 if (!envValidation.isValid) {
     console.error('Environment validation failed:', envValidation.errors);
-    logEnvironment();
 }
-
-// Log environment for debugging
-logEnvironment();
 
 // Appwrite configuration
 const client = new Client()
@@ -20,6 +16,55 @@ const client = new Client()
 export const account = new Account(client);
 export const databases = new Databases(client);
 export const storage = new Storage(client);
+
+// Debug function to check database and collections
+export async function debugAppwrite() {
+    try {
+        console.log('=== Appwrite Debug ===');
+        console.log('Endpoint:', appwriteConfig.endpoint);
+        console.log('Project ID:', appwriteConfig.projectId);
+        console.log('Database ID:', appwriteConfig.databaseId);
+        console.log('Collection Users:', appwriteConfig.collectionUsers);
+        console.log('Collection Transactions:', appwriteConfig.collectionTransactions);
+        
+        // Test basic connection by trying to get user profile
+        console.log('1. Testing basic connection...');
+        try {
+            const user = await account.get();
+            console.log('✅ User authenticated:', user.name);
+            
+            // Try to get user profile (this will test database access)
+            console.log('2. Testing database access...');
+            try {
+                const profile = await databases.getDocument(
+                    appwriteConfig.databaseId,
+                    appwriteConfig.collectionUsers,
+                    user.$id
+                );
+                console.log('✅ Database and collections are working!');
+                console.log('Profile:', profile);
+            } catch (profileError: any) {
+                console.log('❌ Database/Collection error:', profileError.message);
+                if (profileError.message.includes('Database not found')) {
+                    console.log('The database ID might be wrong. Check your Appwrite console.');
+                } else if (profileError.message.includes('Collection not found')) {
+                    console.log('The collection ID might be wrong. Check your Appwrite console.');
+                }
+            }
+            
+        } catch (authError: any) {
+            console.log('❌ Authentication failed:', authError.message);
+        }
+        
+    } catch (error: any) {
+        console.error('Debug error:', error.message);
+    }
+}
+
+// Make debug function available globally
+if (typeof window !== 'undefined') {
+    (window as any).debugAppwrite = debugAppwrite;
+}
 
 // Database and collection IDs
 export const DATABASE_ID = appwriteConfig.databaseId;

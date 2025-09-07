@@ -15,41 +15,19 @@ interface OpenAIConfig {
     apiKey: string | undefined;
 }
 
-// Debug function to log all available environment variables
-function debugEnvironment() {
-    console.log('=== DEBUG: All import.meta.env ===');
-    console.log(import.meta.env);
-    console.log('=== DEBUG: All process.env ===');
-    console.log(process.env);
-    console.log('=== DEBUG: Window object ===');
-    console.log(typeof window !== 'undefined' ? window : 'Window not available');
-}
-
 // Validate and get environment variables
 function getEnvVar(key: string, fallback?: string): string {
-    // First, let's see what's available
-    if (key === 'VITE_APPWRITE_ENDPOINT') {
-        debugEnvironment();
-    }
-    
     const value = import.meta.env[key];
-    
-    console.log(`Environment variable ${key}:`, {
-        'import.meta.env[key]': import.meta.env[key],
-        'value': value,
-        'fallback': fallback
-    });
-    
+
     if (!value && !fallback) {
         console.warn(`Environment variable ${key} is not set`);
         return '';
     }
-    
+
     if (!value && fallback) {
-        console.log(`Using fallback for ${key}: ${fallback}`);
         return fallback;
     }
-    
+
     return value;
 }
 
@@ -105,14 +83,3 @@ export function validateEnvironment(): { isValid: boolean; errors: string[] } {
     };
 }
 
-// Debug function to log current environment
-export function logEnvironment() {
-    console.log('=== Environment Variables ===');
-    console.log('VITE_APPWRITE_ENDPOINT:', import.meta.env.VITE_APPWRITE_ENDPOINT || 'NOT SET');
-    console.log('VITE_APPWRITE_PROJECT_ID:', import.meta.env.VITE_APPWRITE_PROJECT_ID || 'NOT SET');
-    console.log('VITE_APPWRITE_DATABASE_ID:', import.meta.env.VITE_APPWRITE_DATABASE_ID || 'NOT SET');
-    console.log('VITE_APPWRITE_COLLECTION_USERS:', import.meta.env.VITE_APPWRITE_COLLECTION_USERS || 'NOT SET');
-    console.log('VITE_APPWRITE_COLLECTION_TRANSACTIONS:', import.meta.env.VITE_APPWRITE_COLLECTION_TRANSACTIONS || 'NOT SET');
-    console.log('VITE_OPENAI_API_KEY:', import.meta.env.VITE_OPENAI_API_KEY ? 'SET' : 'NOT SET');
-    console.log('=============================');
-}
