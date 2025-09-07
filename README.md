@@ -1,11 +1,101 @@
-# React + TypeScript + Vite
+# FinBoard - AI-Powered Financial Dashboard
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern financial dashboard built with React, TypeScript, and Vite, featuring AI-powered transaction categorization and insights.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- 🚀 **Modern UI**: Built with shadcn/ui and Tailwind CSS
+- 🤖 **AI-Powered**: Automatic transaction categorization using OpenAI
+- 📊 **Financial Insights**: Smart spending analysis and recommendations
+- 🔐 **Secure Authentication**: Powered by Appwrite
+- 📱 **Responsive Design**: Works on all devices
+- ⚡ **Fast Performance**: Built with Vite for optimal speed
+
+## Tech Stack
+
+- **Frontend**: React 18 + TypeScript + Vite
+- **UI**: shadcn/ui + Tailwind CSS
+- **Backend**: Appwrite (Authentication, Database, Storage)
+- **AI**: OpenAI API for transaction categorization
+- **Forms**: React Hook Form + Zod validation
+- **Animations**: Framer Motion
+
+## Quick Start
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/your-username/finboard.git
+cd finboard
+```
+
+### 2. Install Dependencies
+
+```bash
+npm install
+```
+
+### 3. Environment Setup
+
+Copy the environment template and fill in your values:
+
+```bash
+cp env.example .env
+```
+
+Edit `.env` with your actual values:
+
+```env
+# Appwrite Configuration
+VITE_APPWRITE_ENDPOINT=https://cloud.appwrite.io/v1
+VITE_APPWRITE_PROJECT_ID=your-project-id-here
+
+# Database Configuration
+VITE_APPWRITE_DATABASE_ID=finboard-db
+VITE_APPWRITE_COLLECTION_USERS=users
+VITE_APPWRITE_COLLECTION_TRANSACTIONS=transactions
+
+# OpenAI Configuration (Optional)
+VITE_OPENAI_API_KEY=your-openai-api-key-here
+```
+
+### 4. Set Up Appwrite
+
+Follow the detailed setup guide: [APPWRITE_SETUP_GUIDE.md](./APPWRITE_SETUP_GUIDE.md)
+
+### 5. Run Development Server
+
+```bash
+npm run dev
+```
+
+Visit `http://localhost:5173` to see the app.
+
+## Environment Variables
+
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `VITE_APPWRITE_ENDPOINT` | Appwrite API endpoint | Yes |
+| `VITE_APPWRITE_PROJECT_ID` | Your Appwrite project ID | Yes |
+| `VITE_APPWRITE_DATABASE_ID` | Database ID for storing data | Yes |
+| `VITE_APPWRITE_COLLECTION_USERS` | Users collection ID | Yes |
+| `VITE_APPWRITE_COLLECTION_TRANSACTIONS` | Transactions collection ID | Yes |
+| `VITE_OPENAI_API_KEY` | OpenAI API key for AI features | No |
+
+## Deployment
+
+See [DEPLOYMENT.md](./DEPLOYMENT.md) for deployment instructions.
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Submit a pull request
+
+## License
+
+MIT License - see [LICENSE](./LICENSE) for details.
 
 ## Expanding the ESLint configuration
 

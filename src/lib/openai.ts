@@ -1,12 +1,13 @@
 import OpenAI from 'openai';
+import { openaiConfig } from './env';
 
 // Initialize OpenAI client only if API key is available
 let openai: OpenAI | null = null;
 
 const getOpenAIClient = () => {
-    if (!openai && import.meta.env.VITE_OPENAI_API_KEY) {
+    if (!openai && openaiConfig.apiKey) {
         openai = new OpenAI({
-            apiKey: import.meta.env.VITE_OPENAI_API_KEY,
+            apiKey: openaiConfig.apiKey,
             dangerouslyAllowBrowser: true // Only for client-side usage
         });
     }

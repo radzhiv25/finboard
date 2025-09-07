@@ -57,7 +57,7 @@ export function Dashboard() {
             }
 
             // Check if OpenAI API key is available
-            const hasOpenAIKey = import.meta.env.VITE_OPENAI_API_KEY;
+            const hasOpenAIKey = !!import.meta.env.VITE_OPENAI_API_KEY;
 
             if (hasOpenAIKey) {
                 const insights = await aiService.generateInsights(transactions);

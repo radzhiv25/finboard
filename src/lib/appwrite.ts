@@ -1,9 +1,20 @@
 import { Client, Account, Databases, Storage, ID, Query, OAuthProvider } from 'appwrite';
+import { appwriteConfig, validateEnvironment, logEnvironment } from './env';
+
+// Validate environment variables
+const envValidation = validateEnvironment();
+if (!envValidation.isValid) {
+    console.error('Environment validation failed:', envValidation.errors);
+    logEnvironment();
+}
+
+// Log environment for debugging
+logEnvironment();
 
 // Appwrite configuration
 const client = new Client()
-    .setEndpoint(import.meta.env.VITE_APPWRITE_ENDPOINT || 'https://sfo.cloud.appwrite.io/v1')
-    .setProject(import.meta.env.VITE_APPWRITE_PROJECT_ID || '68bd87cf003939f9cf46');
+    .setEndpoint(appwriteConfig.endpoint)
+    .setProject(appwriteConfig.projectId);
 
 // Initialize Appwrite services
 export const account = new Account(client);
@@ -11,11 +22,11 @@ export const databases = new Databases(client);
 export const storage = new Storage(client);
 
 // Database and collection IDs
-export const DATABASE_ID = import.meta.env.VITE_APPWRITE_DATABASE_ID || 'finboard-db';
-export const COLLECTION_USERS = import.meta.env.VITE_APPWRITE_COLLECTION_USERS || 'users';
-export const COLLECTION_TRANSACTIONS = import.meta.env.VITE_APPWRITE_COLLECTION_TRANSACTIONS || 'transactions';
-export const COLLECTION_GOALS = import.meta.env.VITE_APPWRITE_COLLECTION_GOALS || 'goals';
-export const BUCKET_AVATARS = import.meta.env.VITE_APPWRITE_BUCKET_AVATARS || 'avatars';
+export const DATABASE_ID = appwriteConfig.databaseId;
+export const COLLECTION_USERS = appwriteConfig.collectionUsers;
+export const COLLECTION_TRANSACTIONS = appwriteConfig.collectionTransactions;
+export const COLLECTION_GOALS = appwriteConfig.collectionGoals;
+export const BUCKET_AVATARS = appwriteConfig.bucketAvatars;
 
 // Types
 interface UserPreferences {
