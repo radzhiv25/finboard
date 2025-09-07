@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { transactions } from '@/lib/appwrite';
 import { aiService } from '@/lib/openai';
@@ -174,13 +175,15 @@ export function Dashboard() {
                             <Button variant="ghost" size="sm">
                                 <Bell className="h-4 w-4" />
                             </Button>
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => window.location.href = '/settings'}
-                            >
-                                <Settings className="h-4 w-4" />
-                            </Button>
+                                   <Button
+                                       variant="ghost"
+                                       size="sm"
+                                       asChild
+                                   >
+                                       <Link to="/settings">
+                                           <Settings className="h-4 w-4" />
+                                       </Link>
+                                   </Button>
                             <Button variant="ghost" size="sm" onClick={logout}>
                                 <LogOut className="h-4 w-4" />
                             </Button>

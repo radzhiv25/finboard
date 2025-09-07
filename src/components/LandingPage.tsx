@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -28,21 +29,25 @@ export function LandingPage() {
                             analyze spending patterns, and make smarter money decisions.
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                            <Button
-                                size="lg"
+                            <Button 
+                                size="lg" 
                                 className="text-lg px-8"
-                                onClick={() => window.location.href = '/signup'}
+                                asChild
                             >
-                                Get Started Free
-                                <ArrowRight className="ml-2 h-5 w-5" />
+                                <Link to="/signup">
+                                    Get Started Free
+                                    <ArrowRight className="ml-2 h-5 w-5" />
+                                </Link>
                             </Button>
-                            <Button
-                                variant="outline"
-                                size="lg"
+                            <Button 
+                                variant="outline" 
+                                size="lg" 
                                 className="text-lg px-8"
-                                onClick={() => window.location.href = '/login'}
+                                asChild
                             >
-                                Sign In
+                                <Link to="/login">
+                                    Sign In
+                                </Link>
                             </Button>
                         </div>
                         <p className="text-sm text-muted-foreground mt-4">
@@ -150,20 +155,24 @@ export function LandingPage() {
                         </CardHeader>
                         <CardContent className="text-center">
                             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-6">
-                                <Button
-                                    size="lg"
+                                <Button 
+                                    size="lg" 
                                     className="text-lg px-8"
-                                    onClick={() => window.location.href = '/signup'}
+                                    asChild
                                 >
-                                    Get Started Free
+                                    <Link to="/signup">
+                                        Get Started Free
+                                    </Link>
                                 </Button>
-                                <Button
-                                    variant="outline"
-                                    size="lg"
+                                <Button 
+                                    variant="outline" 
+                                    size="lg" 
                                     className="text-lg px-8"
-                                    onClick={() => window.location.href = '/login'}
+                                    asChild
                                 >
-                                    Sign In
+                                    <Link to="/login">
+                                        Sign In
+                                    </Link>
                                 </Button>
                             </div>
                             <p className="text-sm text-muted-foreground">

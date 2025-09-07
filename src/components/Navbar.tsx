@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { BarChart3 } from "lucide-react"
 
@@ -18,18 +19,22 @@ export function Navbar() {
             <a href="#about" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">About</a>
           </div>
           <div className="flex items-center space-x-4">
-            <Button
-              variant="ghost"
+            <Button 
+              variant="ghost" 
               size="sm"
-              onClick={() => window.location.href = '/login'}
+              asChild
             >
-              Sign In
+              <Link to="/login">
+                Sign In
+              </Link>
             </Button>
-            <Button
+            <Button 
               size="sm"
-              onClick={() => window.location.href = '/signup'}
+              asChild
             >
-              Get Started
+              <Link to="/signup">
+                Get Started
+              </Link>
             </Button>
           </div>
         </div>

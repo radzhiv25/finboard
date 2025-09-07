@@ -1,3 +1,4 @@
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom"
 import { AuthProvider, useAuth } from "@/contexts/AuthContext"
 import { Dashboard } from "@/components/Dashboard"
 import { LandingPage } from "@/components/LandingPage"
@@ -9,7 +10,7 @@ import { motion } from "framer-motion"
 function AppContent() {
   const { user, loading } = useAuth()
 
-  console.log('AppContent render:', { user: !!user, loading, pathname: window.location.pathname })
+  console.log('AppContent render:', { user: !!user, loading })
 
   if (loading) {
     return (
@@ -35,31 +36,30 @@ function AppContent() {
     )
   }
 
-  // Check if user is on auth page (login/signup)
-  const isAuthPage = window.location.pathname === '/login' || window.location.pathname === '/signup'
-  const isSettingsPage = window.location.pathname === '/settings'
-  console.log('Routing decision:', { isAuthPage, isSettingsPage, hasUser: !!user })
-
-  if (isAuthPage) {
-    return <AuthPage />
-  }
-
-  if (isSettingsPage && user) {
-    return <Settings />
-  }
-
-  if (user) {
-    return <Dashboard />
-  }
-
-  return <LandingPage />
+  return (
+    <Routes>
+      {/* Public routes */}
+      <Route path="/" element={user ? <Navigate to="/dashboard" replace /> : <LandingPage />} />
+      <Route path="/login" element={user ? <Navigate to="/dashboard" replace /> : <AuthPage />} />
+      <Route path="/signup" element={user ? <Navigate to="/dashboard" replace /> : <AuthPage />} />
+      
+      {/* Protected routes */}
+      <Route path="/dashboard" element={user ? <Dashboard /> : <Navigate to="/login" replace />} />
+      <Route path="/settings" element={user ? <Settings /> : <Navigate to="/login" replace />} />
+      
+      {/* Catch all route */}
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  )
 }
 
 function App() {
   return (
-    <AuthProvider>
-      <AppContent />
-    </AuthProvider>
+    <Router>
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
+    </Router>
   )
 }
 
