@@ -23,6 +23,7 @@ import {
     Brain,
     Sparkles
 } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface Transaction {
     $id: string;
@@ -31,6 +32,7 @@ interface Transaction {
     amount: number;
     currency: 'USD' | 'INR';
     category: string;
+    type: 'income' | 'expense';
     date: string;
     tags?: string;
 }
@@ -40,6 +42,7 @@ interface AIInsight {
     confidence: number;
     suggestion: string;
     spendingPattern?: string;
+    trend?: string;
 }
 
 export function Dashboard() {
@@ -48,6 +51,14 @@ export function Dashboard() {
     const [aiInsights, setAiInsights] = useState<AIInsight[]>([]);
     const [loading, setLoading] = useState(true);
     const [isTransactionDialogOpen, setIsTransactionDialogOpen] = useState(false);
+    const [selectedCurrency, setSelectedCurrency] = useState<'USD' | 'INR'>(() => {
+        // Check localStorage first, then user preferences, default to INR
+        const stored = localStorage.getItem('finboard-currency');
+        if (stored === 'USD' || stored === 'INR') {
+            return stored;
+        }
+        return 'INR'; // Default to INR
+    });
 
     const generateAIInsights = useCallback(async (transactions: Transaction[]) => {
         try {
@@ -90,36 +101,76 @@ export function Dashboard() {
     const loadDashboardData = useCallback(async () => {
         try {
             setLoading(true);
-            const transactionsData = await transactions.getUserTransactions(10);
-            setRecentTransactions(transactionsData.documents as unknown as Transaction[]);
 
-            // Generate AI insights based on transactions
-            await generateAIInsights(transactionsData.documents as unknown as Transaction[]);
+            // Add timeout to prevent hanging
+            const transactionsData = await Promise.race([
+                transactions.getUserTransactions(50), // Get more transactions to filter
+                new Promise((_, reject) =>
+                    setTimeout(() => reject(new Error('Transactions timeout')), 5000)
+                )
+            ]) as any;
+
+            const allTransactions = transactionsData.documents as unknown as Transaction[];
+
+            // Filter transactions by selected currency
+            const filteredTransactions = allTransactions.filter(transaction =>
+                transaction.currency === selectedCurrency
+            );
+
+            setRecentTransactions(filteredTransactions.slice(0, 10)); // Show only 10 most recent
+
+            // Generate AI insights based on transactions (don't wait for this)
+            generateAIInsights(transactionsData.documents as unknown as Transaction[]).catch(error => {
+                console.error('AI insights failed:', error);
+            });
         } catch (error) {
             console.error('Failed to load dashboard data:', error);
             // If it's a database not found error, show a helpful message
             if (error instanceof Error && error.message.includes('Database not found')) {
-                console.log('Database not found, dashboard will show empty state');
             }
+            // Set empty state on any error - but don't redirect
+            setRecentTransactions([]);
         } finally {
             setLoading(false);
         }
-    }, [generateAIInsights]);
+    }, [generateAIInsights, selectedCurrency]);
+
+    // Handle currency change and persist it
+    const handleCurrencyChange = (currency: 'USD' | 'INR') => {
+        setSelectedCurrency(currency);
+        localStorage.setItem('finboard-currency', currency);
+    };
+
+    // Detect currency from user preferences (but prioritize localStorage)
+    useEffect(() => {
+        if (userProfile && 'preferences' in userProfile) {
+            try {
+                const prefs = JSON.parse((userProfile as { preferences: string }).preferences);
+                if (prefs.currency && (prefs.currency === 'USD' || prefs.currency === 'INR')) {
+                    // Only update if localStorage doesn't have a preference
+                    if (!localStorage.getItem('finboard-currency')) {
+                        setSelectedCurrency(prefs.currency);
+                        localStorage.setItem('finboard-currency', prefs.currency);
+                    }
+                }
+            } catch (error) {
+                console.warn('Failed to parse user preferences:', error);
+            }
+        }
+    }, [userProfile]);
 
     useEffect(() => {
         loadDashboardData();
     }, [loadDashboardData]);
 
     const calculateTotals = () => {
-        const incomeCategories = ['Income', 'Investment'];
-
         const totalIncome = recentTransactions
-            .filter(t => incomeCategories.includes(t.category))
-            .reduce((sum, t) => sum + t.amount, 0);
+            .filter(t => t.type === 'income')
+            .reduce((sum, t) => sum + Math.abs(t.amount), 0);
 
         const totalExpenses = recentTransactions
-            .filter(t => !incomeCategories.includes(t.category))
-            .reduce((sum, t) => sum + t.amount, 0);
+            .filter(t => t.type === 'expense')
+            .reduce((sum, t) => sum + Math.abs(t.amount), 0);
 
         return {
             income: totalIncome,
@@ -130,7 +181,7 @@ export function Dashboard() {
 
     const totals = calculateTotals();
 
-    const formatCurrency = (amount: number, currency: 'USD' | 'INR' = 'USD') => {
+    const formatCurrency = (amount: number, currency: 'USD' | 'INR' = selectedCurrency) => {
         return new Intl.NumberFormat('en-US', {
             style: 'currency',
             currency: currency
@@ -176,6 +227,15 @@ export function Dashboard() {
                         </div>
 
                         <div className="flex items-center space-x-4">
+                            <Select value={selectedCurrency} onValueChange={handleCurrencyChange}>
+                                <SelectTrigger className="w-20">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="USD">USD</SelectItem>
+                                    <SelectItem value="INR">INR</SelectItem>
+                                </SelectContent>
+                            </Select>
                             <Button variant="ghost" size="sm">
                                 <Bell className="h-4 w-4" />
                             </Button>
@@ -228,7 +288,7 @@ export function Dashboard() {
                                 {formatCurrency(totals.income)}
                             </div>
                             <p className="text-xs text-muted-foreground">
-                                This month
+                                This month • {selectedCurrency}
                             </p>
                         </CardContent>
                     </Card>
@@ -243,7 +303,7 @@ export function Dashboard() {
                                 {formatCurrency(totals.expenses)}
                             </div>
                             <p className="text-xs text-muted-foreground">
-                                This month
+                                This month • {selectedCurrency}
                             </p>
                         </CardContent>
                     </Card>
@@ -258,7 +318,7 @@ export function Dashboard() {
                                 {formatCurrency(totals.net)}
                             </div>
                             <p className="text-xs text-muted-foreground">
-                                This month
+                                This month • {selectedCurrency}
                             </p>
                         </CardContent>
                     </Card>
@@ -296,8 +356,7 @@ export function Dashboard() {
                                         </div>
                                     ) : (
                                         recentTransactions.map((transaction) => {
-                                            const incomeCategories = ['Income', 'Investment'];
-                                            const isIncome = incomeCategories.includes(transaction.category);
+                                            const isIncome = transaction.type === 'income';
 
                                             return (
                                                 <div key={transaction.$id} className="flex items-center justify-between">
@@ -322,7 +381,7 @@ export function Dashboard() {
                                                     <div className="text-right">
                                                         <p className={`font-medium ${isIncome ? 'text-green-600' : 'text-red-600'
                                                             }`}>
-                                                            {isIncome ? '+' : '-'}{formatCurrency(transaction.amount, transaction.currency)}
+                                                            {isIncome ? '+' : ''}{formatCurrency(Math.abs(transaction.amount), transaction.currency)}
                                                         </p>
                                                         <p className="text-xs text-muted-foreground">{transaction.currency}</p>
                                                     </div>
@@ -350,7 +409,14 @@ export function Dashboard() {
                                     </CardTitle>
                                     <CardDescription>Smart analysis of your spending patterns</CardDescription>
                                 </div>
-                                <Button size="sm" variant="outline">
+                                <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => {
+                                        loadDashboardData();
+                                    }}
+                                    disabled={loading}
+                                >
                                     <Sparkles className="h-4 w-4 mr-2" />
                                     Refresh
                                 </Button>
@@ -376,6 +442,11 @@ export function Dashboard() {
                                                 {insight.spendingPattern && (
                                                     <p className="text-xs text-muted-foreground">
                                                         Pattern: {insight.spendingPattern}
+                                                    </p>
+                                                )}
+                                                {insight.trend && (
+                                                    <p className="text-xs text-muted-foreground">
+                                                        Trend: {insight.trend}
                                                     </p>
                                                 )}
                                             </div>
@@ -409,15 +480,34 @@ export function Dashboard() {
                                     <Plus className="h-6 w-6" />
                                     <span>Add Transaction</span>
                                 </Button>
-                                <Button variant="outline" className="h-20 flex-col space-y-2">
+                                <Button
+                                    variant="outline"
+                                    className="h-20 flex-col space-y-2"
+                                    onClick={() => {
+                                        loadDashboardData();
+                                    }}
+                                >
                                     <Brain className="h-6 w-6" />
                                     <span>AI Analysis</span>
                                 </Button>
-                                <Button variant="outline" className="h-20 flex-col space-y-2">
-                                    <PieChart className="h-6 w-6" />
-                                    <span>View Reports</span>
+                                <Button
+                                    variant="outline"
+                                    className="h-20 flex-col space-y-2"
+                                    asChild
+                                >
+                                    <Link to="/reports">
+                                        <PieChart className="h-6 w-6" />
+                                        <span>View Reports</span>
+                                    </Link>
                                 </Button>
-                                <Button variant="outline" className="h-20 flex-col space-y-2">
+                                <Button
+                                    variant="outline"
+                                    className="h-20 flex-col space-y-2"
+                                    onClick={() => {
+                                        // TODO: Implement scheduling feature
+                                        alert('Scheduling feature coming soon! This will help you set up recurring transactions and reminders.');
+                                    }}
+                                >
                                     <Calendar className="h-6 w-6" />
                                     <span>Schedule</span>
                                 </Button>

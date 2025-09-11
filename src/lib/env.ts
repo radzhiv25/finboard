@@ -51,30 +51,49 @@ export const openaiConfig: OpenAIConfig = {
 export function validateEnvironment(): { isValid: boolean; errors: string[] } {
     const errors: string[] = [];
 
+    console.log('🔍 Environment Variables Check:');
+    console.log('================================');
+
     // Check required Appwrite variables
-    if (!import.meta.env.VITE_APPWRITE_ENDPOINT) {
+    const endpoint = import.meta.env.VITE_APPWRITE_ENDPOINT;
+    const projectId = import.meta.env.VITE_APPWRITE_PROJECT_ID;
+    const databaseId = import.meta.env.VITE_APPWRITE_DATABASE_ID;
+    const collectionUsers = import.meta.env.VITE_APPWRITE_COLLECTION_USERS;
+    const collectionTransactions = import.meta.env.VITE_APPWRITE_COLLECTION_TRANSACTIONS;
+
+    if (!endpoint) {
         errors.push('VITE_APPWRITE_ENDPOINT is not set');
     }
 
-    if (!import.meta.env.VITE_APPWRITE_PROJECT_ID) {
+    if (!projectId) {
         errors.push('VITE_APPWRITE_PROJECT_ID is not set');
     }
 
-    if (!import.meta.env.VITE_APPWRITE_DATABASE_ID) {
+    if (!databaseId) {
         errors.push('VITE_APPWRITE_DATABASE_ID is not set');
     }
 
-    if (!import.meta.env.VITE_APPWRITE_COLLECTION_USERS) {
+    if (!collectionUsers) {
         errors.push('VITE_APPWRITE_COLLECTION_USERS is not set');
     }
 
-    if (!import.meta.env.VITE_APPWRITE_COLLECTION_TRANSACTIONS) {
+    if (!collectionTransactions) {
         errors.push('VITE_APPWRITE_COLLECTION_TRANSACTIONS is not set');
     }
 
     // OpenAI is optional
     if (!import.meta.env.VITE_OPENAI_API_KEY) {
-        console.log('VITE_OPENAI_API_KEY is not set - AI features will be disabled');
+        console.log('ℹ️  VITE_OPENAI_API_KEY is not set - AI features will be disabled');
+    }
+
+    if (errors.length > 0) {
+        console.error('❌ Environment validation failed!');
+        console.error('Please set up your environment variables:');
+        errors.forEach(error => console.error(`   - ${error}`));
+        console.error('\nRun: node setup-environment.js');
+        console.error('Then follow APPWRITE_SETUP_GUIDE.md for database setup');
+    } else {
+        console.log('✅ All required environment variables are set!');
     }
 
     return {

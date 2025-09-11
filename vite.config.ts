@@ -11,6 +11,9 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  optimizeDeps: {
+    include: ['recharts', 'react-is'],
+  },
   build: {
     outDir: 'dist',
     sourcemap: false,
@@ -24,6 +27,7 @@ export default defineConfig({
           appwrite: ['appwrite'],
           openai: ['openai'],
           motion: ['framer-motion'],
+          charts: ['recharts', 'react-is'],
         },
       },
     },

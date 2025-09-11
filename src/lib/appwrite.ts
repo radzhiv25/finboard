@@ -20,21 +20,12 @@ export const storage = new Storage(client);
 // Debug function to check database and collections
 export async function debugAppwrite() {
     try {
-        console.log('=== Appwrite Debug ===');
-        console.log('Endpoint:', appwriteConfig.endpoint);
-        console.log('Project ID:', appwriteConfig.projectId);
-        console.log('Database ID:', appwriteConfig.databaseId);
-        console.log('Collection Users:', appwriteConfig.collectionUsers);
-        console.log('Collection Transactions:', appwriteConfig.collectionTransactions);
-        
+
         // Test basic connection by trying to get user profile
-        console.log('1. Testing basic connection...');
         try {
             const user = await account.get();
-            console.log('✅ User authenticated:', user.name);
-            
+
             // Try to get user profile (this will test database access)
-            console.log('2. Testing database access...');
             try {
                 const profile = await databases.getDocument(
                     appwriteConfig.databaseId,
@@ -42,28 +33,29 @@ export async function debugAppwrite() {
                     user.$id
                 );
                 console.log('✅ Database and collections are working!');
-                console.log('Profile:', profile);
-            } catch (profileError: any) {
-                console.log('❌ Database/Collection error:', profileError.message);
-                if (profileError.message.includes('Database not found')) {
+            } catch (profileError: unknown) {
+                const error = profileError as Error;
+                console.log('❌ Database/Collection error:', error.message);
+                if (error.message.includes('Database not found')) {
                     console.log('The database ID might be wrong. Check your Appwrite console.');
-                } else if (profileError.message.includes('Collection not found')) {
+                } else if (error.message.includes('Collection not found')) {
                     console.log('The collection ID might be wrong. Check your Appwrite console.');
                 }
             }
-            
-        } catch (authError: any) {
-            console.log('❌ Authentication failed:', authError.message);
+
+        } catch (authError: unknown) {
+            const error = authError as Error;
         }
-        
-    } catch (error: any) {
-        console.error('Debug error:', error.message);
+
+    } catch (error: unknown) {
+        const err = error as Error;
+        console.error('Debug error:', err.message);
     }
 }
 
 // Make debug function available globally
 if (typeof window !== 'undefined') {
-    (window as any).debugAppwrite = debugAppwrite;
+    (window as unknown as Record<string, unknown>).debugAppwrite = debugAppwrite;
 }
 
 // Database and collection IDs
@@ -86,6 +78,7 @@ interface TransactionData {
     amount: number;
     currency: 'USD' | 'INR';
     category: string;
+    type: 'income' | 'expense';
     date: string;
     tags?: string[];
 }
@@ -125,17 +118,19 @@ export const auth = {
                         } as UserPreferences)
                     }
                 );
-            } catch (dbError: any) {
-                console.error('Database error during account creation:', dbError);
-                if (dbError.code === 404) {
+            } catch (dbError: unknown) {
+                const error = dbError as Error & { code?: number };
+                console.error('Database error during account creation:', error);
+                if (error.code === 404) {
                     throw new Error('Database or collection not found. Please check your Appwrite setup. See APPWRITE_SETUP_GUIDE.md for instructions.');
                 }
-                throw new Error(`Failed to create user profile: ${dbError.message}`);
+                throw new Error(`Failed to create user profile: ${error.message}`);
             }
 
             return user;
-        } catch (error: any) {
-            console.error('Account creation error:', error);
+        } catch (error: unknown) {
+            const err = error as Error;
+            console.error('Account creation error:', err);
             throw error;
         }
     },
@@ -154,14 +149,15 @@ export const auth = {
     async getCurrentUser() {
         try {
             return await account.get();
-        } catch (error: any) {
+        } catch (error: unknown) {
+            const err = error as Error & { code?: number; type?: string };
             // Handle specific Appwrite errors
-            if (error.code === 401 || error.type === 'general_unauthorized_scope') {
+            if (err.code === 401 || err.type === 'general_unauthorized_scope') {
                 // User is not authenticated, return null
                 return null;
             }
             // For other errors, log and return null
-            console.warn('Auth check failed:', error.message);
+            console.warn('Auth check failed:', err.message);
             return null;
         }
     },
@@ -213,12 +209,13 @@ export const auth = {
                 COLLECTION_USERS,
                 user.$id
             );
-        } catch (error: any) {
-            console.error('Profile fetch error:', error);
-            if (error.code === 404) {
+        } catch (error: unknown) {
+            const err = error as Error & { code?: number };
+            console.error('Profile fetch error:', err);
+            if (err.code === 404) {
                 throw new Error('Database or collection not found. Please check your Appwrite setup. See APPWRITE_SETUP_GUIDE.md for instructions.');
             }
-            throw new Error(`Failed to fetch user profile: ${error.message}`);
+            throw new Error(`Failed to fetch user profile: ${err.message}`);
         }
     }
 };
@@ -241,12 +238,13 @@ export const transactions = {
                     tags: transaction.tags ? JSON.stringify(transaction.tags) : null
                 }
             );
-        } catch (error: any) {
-            console.error('Transaction creation failed:', error);
-            if (error.code === 404) {
+        } catch (error: unknown) {
+            const err = error as Error & { code?: number };
+            console.error('Transaction creation failed:', err);
+            if (err.code === 404) {
                 throw new Error('Database not found. Please set up your Appwrite database first. See APPWRITE_SETUP_GUIDE.md for instructions.');
             }
-            throw new Error(`Failed to create transaction: ${error.message}`);
+            throw new Error(`Failed to create transaction: ${err.message}`);
         }
     },
 
@@ -266,14 +264,14 @@ export const transactions = {
                     Query.offset(offset)
                 ]
             );
-        } catch (error: any) {
-            console.error('Failed to load transactions:', error);
-            if (error.code === 404) {
+        } catch (error: unknown) {
+            const err = error as Error & { code?: number };
+            console.error('Failed to load transactions:', err);
+            if (err.code === 404) {
                 // Database not found, return empty result
-                console.log('Database not found, returning empty transactions list');
                 return { documents: [], total: 0 };
             }
-            throw new Error(`Failed to load transactions: ${error.message}`);
+            throw new Error(`Failed to load transactions: ${err.message}`);
         }
     },
 

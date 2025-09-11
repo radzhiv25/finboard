@@ -5,7 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '@/contexts/AuthContext';
-import { Settings as SettingsIcon, Save, DollarSign } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Settings as SettingsIcon, Save, DollarSign, BarChart3, Bell, LogOut, ArrowLeft } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface UserPreferences {
     currency: 'USD' | 'INR';
@@ -14,9 +16,10 @@ interface UserPreferences {
 }
 
 export function Settings() {
-    const { userProfile, updatePreferences } = useAuth();
+    const { userProfile, updatePreferences, logout } = useAuth();
+    const navigate = useNavigate();
     const [preferences, setPreferences] = useState<UserPreferences>({
-        currency: 'USD',
+        currency: 'INR',
         theme: 'light',
         notifications: true,
     });
@@ -28,7 +31,7 @@ export function Settings() {
             try {
                 const parsed = JSON.parse((userProfile as { preferences: string }).preferences);
                 setPreferences({
-                    currency: parsed.currency || 'USD',
+                    currency: parsed.currency || 'INR',
                     theme: parsed.theme || 'light',
                     notifications: parsed.notifications !== false,
                 });
@@ -43,7 +46,9 @@ export function Settings() {
             setLoading(true);
             await updatePreferences(preferences);
             setSaved(true);
-            setTimeout(() => setSaved(false), 2000);
+            setTimeout(() => setSaved(false), 1000);
+            // Use replace to avoid back button issues
+            navigate('/dashboard', { replace: true });
         } catch (error) {
             console.error('Failed to save preferences:', error);
         } finally {
@@ -59,9 +64,27 @@ export function Settings() {
                     <div className="flex h-16 items-center justify-between">
                         <div className="flex items-center space-x-2">
                             <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-                                <SettingsIcon className="h-5 w-5 text-primary-foreground" />
+                                <BarChart3 className="h-5 w-5 text-primary-foreground" />
                             </div>
-                            <span className="text-xl font-bold">Settings</span>
+                            <span className="text-xl font-bold">FinBoard</span>
+                        </div>
+
+                        <div className="flex items-center space-x-4">
+                            <Button variant="ghost" size="sm">
+                                <Bell className="h-4 w-4" />
+                            </Button>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                asChild
+                            >
+                                <Link to="/settings">
+                                    <SettingsIcon className="h-4 w-4" />
+                                </Link>
+                            </Button>
+                            <Button variant="ghost" size="sm" onClick={logout}>
+                                <LogOut className="h-4 w-4" />
+                            </Button>
                         </div>
                     </div>
                 </div>
@@ -73,6 +96,17 @@ export function Settings() {
                     animate={{ opacity: 1, y: 0 }}
                     className="max-w-2xl mx-auto"
                 >
+                    <div className="flex items-center gap-4 mb-6">
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => navigate('/dashboard')}
+                            className="flex items-center gap-2"
+                        >
+                            <ArrowLeft className="h-4 w-4" />
+                            Back to Dashboard
+                        </Button>
+                    </div>
                     <h1 className="text-3xl font-bold mb-2">Settings</h1>
                     <p className="text-muted-foreground mb-8">
                         Manage your account preferences and application settings
@@ -111,8 +145,8 @@ export function Settings() {
                             </CardContent>
                         </Card>
 
-                        {/* Theme Settings */}
-                        <Card>
+                        {/* Theme Settings - Commented out for now */}
+                        {/* <Card>
                             <CardHeader>
                                 <CardTitle>Appearance</CardTitle>
                                 <CardDescription>
@@ -138,7 +172,7 @@ export function Settings() {
                                     </Select>
                                 </div>
                             </CardContent>
-                        </Card>
+                        </Card> */}
 
                         {/* Save Button */}
                         <div className="flex justify-end">

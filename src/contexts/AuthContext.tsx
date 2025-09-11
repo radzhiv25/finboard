@@ -36,19 +36,45 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     const refreshUser = async () => {
         try {
-            console.log('Refreshing user...');
-            const currentUser = await auth.getCurrentUser();
-            console.log('Current user:', currentUser);
+
+            // Use Promise.race to add a timeout to the API call
+            const currentUser = await Promise.race([
+                auth.getCurrentUser(),
+                new Promise((_, reject) =>
+                    setTimeout(() => reject(new Error('Auth timeout')), 4000)
+                )
+            ]) as any;
+
             setUser(currentUser);
 
             if (currentUser) {
                 try {
-                    console.log('Fetching user profile...');
-                    const profile = await auth.getUserProfile();
-                    console.log('User profile:', profile);
+
+                    // Add timeout to profile fetch as well
+                    const profile = await Promise.race([
+                        auth.getUserProfile(),
+                        new Promise((_, reject) =>
+                            setTimeout(() => reject(new Error('Profile timeout')), 3000)
+                        )
+                    ]) as any;
+
                     setUserProfile(profile);
                 } catch (error: any) {
-                    console.log('Profile fetch error:', error);
+
+                    // If it's a timeout, create a default profile
+                    if (error.message === 'Profile timeout') {
+                        const defaultProfile = {
+                            name: currentUser.name || 'User',
+                            preferences: JSON.stringify({
+                                currency: 'INR',
+                                theme: 'light',
+                                notifications: true
+                            })
+                        } as any;
+                        setUserProfile(defaultProfile);
+                        return;
+                    }
+
                     // Handle specific Appwrite errors
                     if (error.code === 401 || error.type === 'general_unauthorized_scope') {
                         // User session expired or invalid
@@ -56,11 +82,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
                         setUserProfile(null);
                     } else if (error.message.includes('Database or collection not found')) {
                         // Database doesn't exist yet, create a default profile
-                        console.log('Database not found, using default profile');
                         const defaultProfile = {
                             name: currentUser.name || 'User',
                             preferences: JSON.stringify({
-                                currency: 'USD',
+                                currency: 'INR',
                                 theme: 'light',
                                 notifications: true
                             })
@@ -68,14 +93,30 @@ export function AuthProvider({ children }: AuthProviderProps) {
                         setUserProfile(defaultProfile);
                     } else {
                         console.error('Failed to fetch user profile:', error);
-                        setUserProfile(null);
+                        // Create a default profile on any other error
+                        const defaultProfile = {
+                            name: currentUser.name || 'User',
+                            preferences: JSON.stringify({
+                                currency: 'INR',
+                                theme: 'light',
+                                notifications: true
+                            })
+                        } as any;
+                        setUserProfile(defaultProfile);
                     }
                 }
             } else {
                 setUserProfile(null);
             }
         } catch (error: any) {
-            console.log('User refresh error:', error);
+
+            // If it's a timeout, assume user is not authenticated
+            if (error.message === 'Auth timeout') {
+                setUser(null);
+                setUserProfile(null);
+                return;
+            }
+
             // Handle specific Appwrite errors
             if (error.code === 401 || error.type === 'general_unauthorized_scope') {
                 // User is not authenticated, this is normal
@@ -90,25 +131,34 @@ export function AuthProvider({ children }: AuthProviderProps) {
     };
 
     useEffect(() => {
+        let isMounted = true;
+
         const initializeAuth = async () => {
             try {
                 await refreshUser();
             } catch (error) {
                 console.error('Auth initialization failed:', error);
             } finally {
-                setLoading(false);
+                if (isMounted) {
+                    setLoading(false);
+                }
             }
         };
 
-        // Add a timeout to prevent infinite loading
+        // Add a timeout to prevent infinite loading - increased to 5 seconds
         const timeout = setTimeout(() => {
             console.warn('Auth initialization timeout, setting loading to false');
-            setLoading(false);
-        }, 1000); // 1 second timeout for faster testing
+            if (isMounted) {
+                setLoading(false);
+            }
+        }, 5000); // 5 second timeout for better reliability
 
         initializeAuth();
 
-        return () => clearTimeout(timeout);
+        return () => {
+            isMounted = false;
+            clearTimeout(timeout);
+        };
     }, []);
 
     const login = async (email: string, password: string) => {

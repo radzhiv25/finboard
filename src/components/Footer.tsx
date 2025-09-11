@@ -1,55 +1,65 @@
-import { BarChart3 } from "lucide-react"
+import { BarChart3, DollarSign, TrendingUp, PieChart, Settings, Shield, Wallet } from "lucide-react"
 
 export function Footer() {
   return (
     <footer className="border-t bg-muted/50">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid md:grid-cols-4 gap-8">
-          <div>
-            <div className="flex items-center space-x-2 mb-4">
-              <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-                <BarChart3 className="h-5 w-5 text-primary-foreground" />
-              </div>
-              <span className="text-xl font-bold">FinBoard</span>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              The modern way to manage your finances and achieve your financial goals.
-            </p>
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Bento Grid Layout */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
+          {/* Dashboard Card */}
+          <div className="bg-background border rounded-lg p-4 hover:shadow-sm transition-shadow">
+            <BarChart3 className="h-6 w-6 text-primary mb-2" />
+            <h3 className="font-medium text-sm mb-1">Dashboard</h3>
+            <p className="text-xs text-muted-foreground">Financial overview</p>
           </div>
-          
-          <div>
-            <h3 className="font-semibold mb-4">Product</h3>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><a href="#" className="hover:text-foreground transition-colors">Features</a></li>
-              <li><a href="#" className="hover:text-foreground transition-colors">Pricing</a></li>
-              <li><a href="#" className="hover:text-foreground transition-colors">Security</a></li>
-              <li><a href="#" className="hover:text-foreground transition-colors">API</a></li>
-            </ul>
+
+          {/* Transactions Card */}
+          <div className="bg-background border rounded-lg p-4 hover:shadow-sm transition-shadow">
+            <DollarSign className="h-6 w-6 text-green-600 mb-2" />
+            <h3 className="font-medium text-sm mb-1">Transactions</h3>
+            <p className="text-xs text-muted-foreground">Track expenses</p>
           </div>
-          
-          <div>
-            <h3 className="font-semibold mb-4">Company</h3>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><a href="#" className="hover:text-foreground transition-colors">About</a></li>
-              <li><a href="#" className="hover:text-foreground transition-colors">Blog</a></li>
-              <li><a href="#" className="hover:text-foreground transition-colors">Careers</a></li>
-              <li><a href="#" className="hover:text-foreground transition-colors">Contact</a></li>
-            </ul>
+
+          {/* Analytics Card */}
+          <div className="bg-background border rounded-lg p-4 hover:shadow-sm transition-shadow">
+            <TrendingUp className="h-6 w-6 text-blue-600 mb-2" />
+            <h3 className="font-medium text-sm mb-1">Analytics</h3>
+            <p className="text-xs text-muted-foreground">Spending insights</p>
           </div>
-          
-          <div>
-            <h3 className="font-semibold mb-4">Support</h3>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><a href="#" className="hover:text-foreground transition-colors">Help Center</a></li>
-              <li><a href="#" className="hover:text-foreground transition-colors">Community</a></li>
-              <li><a href="#" className="hover:text-foreground transition-colors">Status</a></li>
-              <li><a href="#" className="hover:text-foreground transition-colors">Privacy</a></li>
-            </ul>
+
+          {/* Reports Card */}
+          <div className="bg-background border rounded-lg p-4 hover:shadow-sm transition-shadow">
+            <PieChart className="h-6 w-6 text-purple-600 mb-2" />
+            <h3 className="font-medium text-sm mb-1">Reports</h3>
+            <p className="text-xs text-muted-foreground">Visual reports</p>
+          </div>
+
+          {/* Settings Card */}
+          <div className="bg-background border rounded-lg p-4 hover:shadow-sm transition-shadow">
+            <Settings className="h-6 w-6 text-gray-600 mb-2" />
+            <h3 className="font-medium text-sm mb-1">Settings</h3>
+            <p className="text-xs text-muted-foreground">Preferences</p>
+          </div>
+
+          {/* Security Card */}
+          <div className="bg-background border rounded-lg p-4 hover:shadow-sm transition-shadow">
+            <Shield className="h-6 w-6 text-orange-600 mb-2" />
+            <h3 className="font-medium text-sm mb-1">Security</h3>
+            <p className="text-xs text-muted-foreground">Data protection</p>
           </div>
         </div>
-        
-        <div className="border-t mt-8 pt-8 text-center text-sm text-muted-foreground">
-          <p>&copy; 2024 FinBoard. All rights reserved.</p>
+
+        {/* Brand and Copyright */}
+        <div className="flex flex-col sm:flex-row items-center justify-between pt-6 border-t">
+          <div className="flex items-center space-x-2 mb-4 sm:mb-0">
+            <div className="h-6 w-6 rounded bg-primary flex items-center justify-center">
+              <Wallet className="h-4 w-4 text-primary-foreground" />
+            </div>
+            <span className="text-lg font-bold">FinBoard</span>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            &copy; 2025 FinBoard. Your personal finance companion.
+          </p>
         </div>
       </div>
     </footer>

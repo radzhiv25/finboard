@@ -17,9 +17,10 @@ import { Brain, Loader2, DollarSign, Calendar, FileText } from 'lucide-react';
 
 const transactionSchema = z.object({
     title: z.string().min(1, 'Title is required'),
-    description: z.string().min(1, 'Description is required'),
+    description: z.string().optional(),
     amount: z.number().min(0.01, 'Amount must be greater than 0'),
     category: z.string().min(1, 'Category is required'),
+    type: z.enum(['income', 'expense']),
     date: z.date(),
 });
 
@@ -31,26 +32,42 @@ interface TransactionFormProps {
     showCard?: boolean;
 }
 
-const CATEGORIES = [
+// Category definitions
+const INCOME_CATEGORIES = [
+    'Salary',
+    'Freelance',
+    'Investment Returns',
+    'Business Income',
+    'Rental Income',
+    'Bonus',
+    'Gift',
+    'Refund',
+    'Other Income'
+];
+
+const EXPENSE_CATEGORIES = [
     'Food & Dining',
+    'Groceries',
     'Transportation',
-    'Shopping',
     'Entertainment',
+    'Shopping',
     'Bills & Utilities',
     'Healthcare',
     'Education',
     'Travel',
-    'Groceries',
-    'Income',
-    'Investment',
-    'Other'
+    'Subscriptions',
+    'Insurance',
+    'Rent/Mortgage',
+    'Other Expense'
 ];
 
 export function TransactionForm({ onSuccess, onCancel, showCard = true }: TransactionFormProps) {
     const [isLoading, setIsLoading] = useState(false);
     const [aiCategory, setAiCategory] = useState<string | null>(null);
+    const [aiType, setAiType] = useState<'income' | 'expense' | null>(null);
     const [aiLoading, setAiLoading] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState<string>('');
+    const [selectedType, setSelectedType] = useState<'income' | 'expense'>('expense');
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
     const { userProfile } = useAuth();
 
@@ -61,6 +78,7 @@ export function TransactionForm({ onSuccess, onCancel, showCard = true }: Transa
             description: '',
             amount: 0,
             category: '',
+            type: 'expense',
             date: selectedDate,
         },
     });
@@ -70,7 +88,7 @@ export function TransactionForm({ onSuccess, onCancel, showCard = true }: Transa
         form.setValue('date', selectedDate);
     }, [selectedDate, form]);
 
-    const predictCategory = async (title: string) => {
+    const predictCategoryAndType = async (title: string, description: string) => {
         if (!title || title.trim().length < 3) return;
 
         setAiLoading(true);
@@ -79,42 +97,65 @@ export function TransactionForm({ onSuccess, onCancel, showCard = true }: Transa
             const hasOpenAIKey = import.meta.env.VITE_OPENAI_API_KEY;
 
             if (hasOpenAIKey) {
-                const prediction = await aiService.predictCategory(title, '');
+                const prediction = await aiService.predictCategoryAndType(title, description);
                 setAiCategory(prediction.category);
+                setAiType(prediction.type);
                 setSelectedCategory(prediction.category);
+                setSelectedType(prediction.type);
                 form.setValue('category', prediction.category);
+                form.setValue('type', prediction.type);
             } else {
                 // Fallback to simple keyword-based prediction
-                const text = title.toLowerCase();
-                let predictedCategory = 'Other';
+                const text = `${title} ${description}`.toLowerCase();
+                let predictedCategory = 'Other Expense';
+                let predictedType: 'income' | 'expense' = 'expense';
 
-                if (text.includes('food') || text.includes('restaurant') || text.includes('dining') || text.includes('coffee') || text.includes('lunch') || text.includes('dinner')) {
-                    predictedCategory = 'Food & Dining';
-                } else if (text.includes('uber') || text.includes('taxi') || text.includes('gas') || text.includes('fuel') || text.includes('transport') || text.includes('bus') || text.includes('metro')) {
-                    predictedCategory = 'Transportation';
-                } else if (text.includes('shopping') || text.includes('store') || text.includes('amazon') || text.includes('purchase') || text.includes('buy')) {
-                    predictedCategory = 'Shopping';
-                } else if (text.includes('movie') || text.includes('entertainment') || text.includes('game') || text.includes('netflix') || text.includes('spotify')) {
-                    predictedCategory = 'Entertainment';
-                } else if (text.includes('bill') || text.includes('utility') || text.includes('electric') || text.includes('water') || text.includes('internet') || text.includes('phone')) {
-                    predictedCategory = 'Bills & Utilities';
-                } else if (text.includes('doctor') || text.includes('medical') || text.includes('pharmacy') || text.includes('health') || text.includes('hospital')) {
-                    predictedCategory = 'Healthcare';
-                } else if (text.includes('school') || text.includes('education') || text.includes('course') || text.includes('book') || text.includes('tuition')) {
-                    predictedCategory = 'Education';
-                } else if (text.includes('travel') || text.includes('hotel') || text.includes('flight') || text.includes('vacation') || text.includes('trip')) {
-                    predictedCategory = 'Travel';
-                } else if (text.includes('grocery') || text.includes('supermarket') || text.includes('market') || text.includes('grocery') || text.includes('food')) {
-                    predictedCategory = 'Groceries';
-                } else if (text.includes('salary') || text.includes('income') || text.includes('pay') || text.includes('wage') || text.includes('bonus')) {
-                    predictedCategory = 'Income';
-                } else if (text.includes('investment') || text.includes('stock') || text.includes('crypto') || text.includes('dividend') || text.includes('return')) {
-                    predictedCategory = 'Investment';
+                // Check for income indicators first
+                if (text.includes('salary') || text.includes('income') || text.includes('pay') || text.includes('wage') || text.includes('bonus') || text.includes('freelance') || text.includes('payment') || text.includes('refund')) {
+                    predictedType = 'income';
+                    if (text.includes('salary') || text.includes('pay') || text.includes('wage')) {
+                        predictedCategory = 'Salary';
+                    } else if (text.includes('freelance') || text.includes('contract')) {
+                        predictedCategory = 'Freelance';
+                    } else if (text.includes('bonus')) {
+                        predictedCategory = 'Bonus';
+                    } else if (text.includes('refund')) {
+                        predictedCategory = 'Refund';
+                    } else {
+                        predictedCategory = 'Other Income';
+                    }
+                } else {
+                    // Expense categories
+                    if (text.includes('food') || text.includes('restaurant') || text.includes('dining') || text.includes('coffee') || text.includes('lunch') || text.includes('dinner')) {
+                        predictedCategory = 'Food & Dining';
+                    } else if (text.includes('uber') || text.includes('taxi') || text.includes('gas') || text.includes('fuel') || text.includes('transport') || text.includes('bus') || text.includes('metro')) {
+                        predictedCategory = 'Transportation';
+                    } else if (text.includes('shopping') || text.includes('store') || text.includes('amazon') || text.includes('purchase') || text.includes('buy')) {
+                        predictedCategory = 'Shopping';
+                    } else if (text.includes('movie') || text.includes('entertainment') || text.includes('game') || text.includes('netflix') || text.includes('spotify')) {
+                        predictedCategory = 'Entertainment';
+                    } else if (text.includes('bill') || text.includes('utility') || text.includes('electric') || text.includes('water') || text.includes('internet') || text.includes('phone')) {
+                        predictedCategory = 'Bills & Utilities';
+                    } else if (text.includes('doctor') || text.includes('medical') || text.includes('pharmacy') || text.includes('health') || text.includes('hospital')) {
+                        predictedCategory = 'Healthcare';
+                    } else if (text.includes('school') || text.includes('education') || text.includes('course') || text.includes('book') || text.includes('tuition')) {
+                        predictedCategory = 'Education';
+                    } else if (text.includes('travel') || text.includes('hotel') || text.includes('flight') || text.includes('vacation') || text.includes('trip')) {
+                        predictedCategory = 'Travel';
+                    } else if (text.includes('grocery') || text.includes('supermarket') || text.includes('market') || text.includes('grocery') || text.includes('food')) {
+                        predictedCategory = 'Groceries';
+                    } else if (text.includes('investment') || text.includes('stock') || text.includes('crypto') || text.includes('dividend') || text.includes('return')) {
+                        predictedCategory = 'Investment Returns';
+                        predictedType = 'income';
+                    }
                 }
 
                 setAiCategory(predictedCategory);
+                setAiType(predictedType);
                 setSelectedCategory(predictedCategory);
+                setSelectedType(predictedType);
                 form.setValue('category', predictedCategory);
+                form.setValue('type', predictedType);
             }
         } catch (error) {
             console.error('AI prediction failed:', error);
@@ -128,11 +169,11 @@ export function TransactionForm({ onSuccess, onCancel, showCard = true }: Transa
             setIsLoading(true);
 
             // Get user's preferred currency from profile
-            let userCurrency = 'USD';
+            let userCurrency = 'INR';
             if (userProfile && 'preferences' in userProfile) {
                 try {
                     const prefs = JSON.parse((userProfile as { preferences: string }).preferences);
-                    userCurrency = prefs.currency || 'USD';
+                    userCurrency = prefs.currency || 'INR';
                 } catch (error) {
                     console.warn('Failed to parse user preferences:', error);
                 }
@@ -140,18 +181,21 @@ export function TransactionForm({ onSuccess, onCancel, showCard = true }: Transa
 
             const transactionData = {
                 title: data.title,
-                description: data.description,
-                amount: data.amount,
+                description: data.description || '',
+                amount: data.type === 'income' ? Math.abs(data.amount) : -Math.abs(data.amount),
                 currency: userCurrency as 'USD' | 'INR',
                 date: data.date.toISOString().split('T')[0],
                 category: data.category,
+                type: data.type,
             };
 
             await transactions.create(transactionData);
 
             form.reset();
             setAiCategory(null);
+            setAiType(null);
             setSelectedCategory('');
+            setSelectedType('expense');
             setSelectedDate(new Date());
             onSuccess?.();
         } catch (error: unknown) {
@@ -187,8 +231,9 @@ export function TransactionForm({ onSuccess, onCancel, showCard = true }: Transa
                     {...form.register('title')}
                     onBlur={(e) => {
                         const title = e.target.value.trim();
+                        const description = form.getValues('description') || '';
                         if (title.length >= 3) {
-                            predictCategory(title);
+                            predictCategoryAndType(title, description);
                         }
                     }}
                 />
@@ -207,10 +252,44 @@ export function TransactionForm({ onSuccess, onCancel, showCard = true }: Transa
                     placeholder="Additional details about this transaction..."
                     className="min-h-[80px]"
                     {...form.register('description')}
+                    onBlur={(e) => {
+                        const description = e.target.value.trim();
+                        const title = form.getValues('title') || '';
+                        if (title.length >= 3) {
+                            predictCategoryAndType(title, description);
+                        }
+                    }}
                 />
                 {form.formState.errors.description && (
                     <p className="text-sm text-destructive">
                         {form.formState.errors.description.message}
+                    </p>
+                )}
+            </div>
+
+            {/* Transaction Type */}
+            <div className="space-y-2">
+                <Label htmlFor="type">Transaction Type</Label>
+                <Select
+                    value={selectedType}
+                    onValueChange={(value: 'income' | 'expense') => {
+                        setSelectedType(value);
+                        setSelectedCategory(''); // Reset category when type changes
+                        form.setValue('type', value);
+                        form.setValue('category', '');
+                    }}
+                >
+                    <SelectTrigger>
+                        <SelectValue placeholder="Select type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="income">Income</SelectItem>
+                        <SelectItem value="expense">Expense</SelectItem>
+                    </SelectContent>
+                </Select>
+                {form.formState.errors.type && (
+                    <p className="text-sm text-destructive">
+                        {form.formState.errors.type.message}
                     </p>
                 )}
             </div>
@@ -246,7 +325,7 @@ export function TransactionForm({ onSuccess, onCancel, showCard = true }: Transa
                             <SelectValue placeholder="Select category" />
                         </SelectTrigger>
                         <SelectContent>
-                            {CATEGORIES.map((category) => (
+                            {(selectedType === 'income' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES).map((category) => (
                                 <SelectItem key={category} value={category}>
                                     {category}
                                 </SelectItem>
@@ -285,12 +364,12 @@ export function TransactionForm({ onSuccess, onCancel, showCard = true }: Transa
                 )}
             </div>
 
-            {/* AI Category Prediction */}
+            {/* AI Prediction */}
             {(aiLoading || aiCategory) && (
                 <div className="space-y-2">
                     <Label className="flex items-center gap-2">
                         <Brain className="h-4 w-4" />
-                        AI Suggested Category
+                        AI Suggestion
                     </Label>
                     <div className="p-3 bg-muted/50 rounded-lg">
                         {aiLoading ? (
@@ -299,28 +378,49 @@ export function TransactionForm({ onSuccess, onCancel, showCard = true }: Transa
                                 <span className="text-sm">Analyzing transaction...</span>
                             </div>
                         ) : (
-                            <div className="flex items-center justify-between">
-                                <span className="font-medium">{aiCategory}</span>
-                                <div className="flex gap-2">
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => {
-                                            setSelectedCategory(aiCategory!);
-                                            form.setValue('category', aiCategory!);
-                                        }}
-                                    >
-                                        Use This
-                                    </Button>
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => setAiCategory(null)}
-                                    >
-                                        Dismiss
-                                    </Button>
+                            <div className="space-y-2">
+                                <div className="flex items-center justify-between">
+                                    <div className="space-y-1">
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-sm font-medium">Type:</span>
+                                            <span className={`px-2 py-1 rounded text-xs font-medium ${aiType === 'income'
+                                                    ? 'bg-green-100 text-green-800'
+                                                    : 'bg-red-100 text-red-800'
+                                                }`}>
+                                                {aiType === 'income' ? 'Income' : 'Expense'}
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-sm font-medium">Category:</span>
+                                            <span className="font-medium">{aiCategory}</span>
+                                        </div>
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => {
+                                                setSelectedType(aiType!);
+                                                setSelectedCategory(aiCategory!);
+                                                form.setValue('type', aiType!);
+                                                form.setValue('category', aiCategory!);
+                                            }}
+                                        >
+                                            Use This
+                                        </Button>
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => {
+                                                setAiCategory(null);
+                                                setAiType(null);
+                                            }}
+                                        >
+                                            Dismiss
+                                        </Button>
+                                    </div>
                                 </div>
                             </div>
                         )}
