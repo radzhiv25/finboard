@@ -33,6 +33,7 @@ export async function debugAppwrite() {
                     user.$id
                 );
                 console.log('✅ Database and collections are working!');
+                console.log('Profile loaded successfully for user:', profile.$id);
             } catch (profileError: unknown) {
                 const error = profileError as Error;
                 console.log('❌ Database/Collection error:', error.message);
@@ -45,6 +46,7 @@ export async function debugAppwrite() {
 
         } catch (authError: unknown) {
             const error = authError as Error;
+            console.log('Authentication error:', error.message);
         }
 
     } catch (error: unknown) {

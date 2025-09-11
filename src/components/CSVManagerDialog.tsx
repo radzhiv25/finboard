@@ -276,17 +276,6 @@ export function CSVManagerDialog({
                             <Button
                                 onClick={() => {
                                     if (selectedCategory) {
-                                        // Create a quick transaction with the selected category
-                                        const quickTransaction = {
-                                            title: `Quick ${selectedType}`,
-                                            description: '',
-                                            amount: selectedType === 'income' ? 100 : -100,
-                                            currency: selectedCurrency,
-                                            category: selectedCategory,
-                                            type: selectedType,
-                                            date: new Date().toISOString().split('T')[0]
-                                        };
-
                                         // This would need to be implemented to add the transaction
                                     }
                                 }}

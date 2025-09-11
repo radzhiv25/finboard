@@ -6,7 +6,6 @@ import { AuthPage } from "@/pages/AuthPage"
 import { Settings } from "@/components/Settings"
 import { Reports } from "@/components/Reports"
 import { About } from "@/components/About"
-import { TestComponent } from "@/components/TestComponent"
 import { motion } from "framer-motion"
 import { useEffect } from "react"
 
@@ -58,10 +57,6 @@ function AppContent() {
   // Simple routing logic
   const currentPath = location.pathname
 
-  // Test component first to verify basic rendering
-  if (currentPath === '/test') {
-    return <TestComponent />
-  }
 
   // About page (accessible to all users)
   if (currentPath === '/about') {
