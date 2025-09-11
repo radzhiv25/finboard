@@ -249,11 +249,11 @@ export function LandingPage() {
                                                 </div>
                                             </DialogContent>
                                         </Dialog>
-                                </div>
+                                    </div>
                                     <CardDescription className="text-base">
                                         Your central command center for all financial insights
-                                </CardDescription>
-                            </CardHeader>
+                                    </CardDescription>
+                                </CardHeader>
                                 <CardContent className="p-4">
                                     <div className="space-y-3">
                                         {/* Main Financial Metrics */}
@@ -334,7 +334,7 @@ export function LandingPage() {
                                         </div>
                                     </div>
                                 </CardContent>
-                        </Card>
+                            </Card>
                         </motion.div>
 
                         {/* Transactions */}
@@ -348,11 +348,11 @@ export function LandingPage() {
                                     <div className="flex items-center gap-2 mb-1">
                                         <DollarSign className="h-4 w-4 text-green-600" />
                                         <CardTitle className="text-base">Transactions</CardTitle>
-                                </div>
+                                    </div>
                                     <CardDescription className="text-xs">
                                         Track every expense and income
-                                </CardDescription>
-                            </CardHeader>
+                                    </CardDescription>
+                                </CardHeader>
                                 <CardContent className="">
                                     <div className="h-full overflow-y-auto space-y-1.5 pr-1">
                                         {transactions.slice(0, 6).map((transaction: Transaction) => (
@@ -376,7 +376,7 @@ export function LandingPage() {
                                         )}
                                     </div>
                                 </CardContent>
-                        </Card>
+                            </Card>
                         </motion.div>
 
                         {/* AI Insights */}
@@ -390,11 +390,11 @@ export function LandingPage() {
                                     <div className="flex items-center gap-2 mb-1">
                                         <Brain className="h-4 w-4 text-purple-600" />
                                         <CardTitle className="text-base">AI Insights</CardTitle>
-                                </div>
+                                    </div>
                                     <CardDescription className="text-xs">
                                         Smart analysis of your spending
-                                </CardDescription>
-                            </CardHeader>
+                                    </CardDescription>
+                                </CardHeader>
                                 <CardContent className="p-4">
                                     <div className="space-y-2">
                                         <div className="bg-white/70 rounded p-2 hover:bg-white/90 transition-colors">
@@ -418,9 +418,9 @@ export function LandingPage() {
                                         <div className="text-xs text-purple-700 mt-1">
                                             Gets smarter with more data
                                         </div>
-                                </div>
+                                    </div>
                                 </CardContent>
-                        </Card>
+                            </Card>
                         </motion.div>
 
                         {/* Reports */}
@@ -434,11 +434,11 @@ export function LandingPage() {
                                     <div className="flex items-center gap-2 mb-1">
                                         <PieChart className="h-4 w-4 text-blue-600" />
                                         <CardTitle className="text-base">Reports</CardTitle>
-                                </div>
+                                    </div>
                                     <CardDescription className="text-xs">
                                         Visual financial analytics
-                                </CardDescription>
-                            </CardHeader>
+                                    </CardDescription>
+                                </CardHeader>
                                 <CardContent className="">
                                     <div className="space-y-2">
                                         <div className="flex items-center justify-between hover:bg-muted/50 rounded p-1.5 transition-colors">
@@ -472,7 +472,7 @@ export function LandingPage() {
                                     </div>
 
                                 </CardContent>
-                        </Card>
+                            </Card>
                         </motion.div>
 
                         {/* Settings */}
@@ -486,11 +486,11 @@ export function LandingPage() {
                                     <div className="flex items-center gap-2 mb-1">
                                         <Settings className="h-4 w-4 text-gray-600" />
                                         <CardTitle className="text-base">Settings</CardTitle>
-                                </div>
+                                    </div>
                                     <CardDescription className="text-xs">
                                         Customize your experience
-                                </CardDescription>
-                            </CardHeader>
+                                    </CardDescription>
+                                </CardHeader>
                                 <CardContent className="">
                                     <div className="space-y-2">
                                         <div className="flex items-center justify-between hover:bg-muted/50 rounded p-1.5 transition-colors">
@@ -507,7 +507,7 @@ export function LandingPage() {
                                         </div>
                                     </div>
                                 </CardContent>
-                        </Card>
+                            </Card>
                         </motion.div>
                     </div>
                 </div>
